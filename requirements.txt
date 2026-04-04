@@ -1,5 +1,5 @@
 anthropic>=0.40.0
-MetaTrader5>=5.0.45
+# MetaTrader5>=5.0.45  # Windows-only; agent runs in simulation mode on Linux/Mac
 pandas>=2.0.0
 numpy>=1.24.0
 requests>=2.31.0

@@ -5,7 +5,8 @@ MJ APEX TRADER — Configuration & System Prompt
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# override=False: real environment variables take precedence over .env file
+load_dotenv(override=False)
 
 # ── API Keys ────────────────────────────────────────────────────────────────
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")

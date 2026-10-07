@@ -13,7 +13,7 @@ from typing import Optional
 
 import anthropic
 
-from config import MODEL, SYSTEM_PROMPT, ANTHROPIC_API_KEY
+from config import MODEL, SYSTEM_PROMPT, ANTHROPIC_API_KEY, ANTHROPIC_WORKSPACE_ID
 from mt5_bridge import MT5Bridge
 from risk_manager import RiskManager
 from xl_tracker import XLTracker, TradingMode
@@ -39,7 +39,13 @@ class MJApexTrader:
         xl: XLTracker,
         verbose: bool = True,
     ) -> None:
-        self.client  = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        extra_headers = {}
+        if ANTHROPIC_WORKSPACE_ID:
+            extra_headers["anthropic-workspace-id"] = ANTHROPIC_WORKSPACE_ID
+        self.client  = anthropic.Anthropic(
+            api_key=ANTHROPIC_API_KEY,
+            default_headers=extra_headers if extra_headers else None,
+        )
         self.tools_h = ToolHandler(mt5, risk, xl)
         self.xl      = xl
         self.verbose = verbose

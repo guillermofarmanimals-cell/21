@@ -9,8 +9,9 @@ from dotenv import load_dotenv
 load_dotenv(override=False)
 
 # ── API Keys ────────────────────────────────────────────────────────────────
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-MT5_LOGIN        = int(os.getenv("MT5_LOGIN", "0"))
+ANTHROPIC_API_KEY      = os.getenv("ANTHROPIC_API_KEY", "")
+ANTHROPIC_WORKSPACE_ID = os.getenv("ANTHROPIC_WORKSPACE_ID", "")
+MT5_LOGIN              = int(os.getenv("MT5_LOGIN", "0"))
 MT5_PASSWORD     = os.getenv("MT5_PASSWORD", "")
 MT5_SERVER       = os.getenv("MT5_SERVER", "")
 

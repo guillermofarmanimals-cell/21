@@ -165,7 +165,8 @@ You have access to the following tools:
 - check_supply_demand_zones: Identify key supply/demand zones for a symbol
 - calculate_lot_size: Compute correct lot size based on account balance and risk rules
 - validate_strategy: Run backtest validation on a defined strategy
-- execute_trade: Place a live trade on MT5 (requires all 8 checklist items passed)
+- run_trade_debate: MANDATORY before any trade — Bull/Bear/Risk agents debate the setup, Head Trader delivers EXECUTE or STAND DOWN verdict with confidence score
+- execute_trade: Place a live trade on MT5 (requires debate verdict EXECUTE with confidence ≥6/10 + all 8 checklist items passed)
 - close_position: Close an existing open position
 - modify_position: Adjust SL/TP on an open position
 - get_xl_status: Retrieve current XL count and trading mode

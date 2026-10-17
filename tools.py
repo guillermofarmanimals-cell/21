@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from mt5_bridge import MT5Bridge
 from risk_manager import RiskManager
 from xl_tracker import XLTracker
+from debate import TradeDebateEngine
 from intelligence import (
     EconomicCalendar, COTAnalyzer, SentimentAnalyzer,
     CycleAnalyzer, SupplyDemandDetector, StrategyValidator,
@@ -289,6 +290,32 @@ TOOL_DEFINITIONS = [
         },
     },
     {
+        "name": "run_trade_debate",
+        "description": (
+            "Run a multi-agent Bull vs Bear debate before entering any trade. "
+            "Three specialist AI agents debate the setup: Bull Researcher (argues FOR), "
+            "Bear Researcher (argues AGAINST), Risk Manager (stress-tests parameters). "
+            "A Head Trader synthesises the debate and delivers EXECUTE or STAND DOWN. "
+            "ALWAYS call this before execute_trade on any setup you are considering."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "symbol":            {"type": "string", "description": "e.g. XAUUSD"},
+                "direction":         {"type": "string", "enum": ["BUY", "SELL"]},
+                "entry":             {"type": "number", "description": "Proposed entry price"},
+                "stop_loss":         {"type": "number", "description": "Proposed stop loss price"},
+                "take_profit":       {"type": "number", "description": "Proposed take profit price"},
+                "confluence_score":  {"type": "integer", "minimum": 0, "maximum": 5},
+                "analysis_context":  {
+                    "type": "string",
+                    "description": "Your market analysis summary: structure, zones, bias, signals seen",
+                },
+            },
+            "required": ["symbol","direction","entry","stop_loss","take_profit","confluence_score","analysis_context"],
+        },
+    },
+    {
         "name": "run_session_audit",
         "description": (
             "Run a full self-audit across the last N trades. "
@@ -334,6 +361,7 @@ class ToolHandler:
         self.cycles    = CycleAnalyzer()
         self.sd_detect = SupplyDemandDetector()
         self.validator = StrategyValidator()
+        self.debate    = TradeDebateEngine()
 
     # ── Dispatch ──────────────────────────────────────────────────────────────
 
@@ -519,6 +547,39 @@ class ToolHandler:
             "paused_until": result.get("paused_until"),
             "deleted": result.get("deleted", False),
             "world_bot_milestone": result.get("world_bot_milestone"),
+        }
+
+    def _handle_run_trade_debate(
+        self,
+        symbol: str,
+        direction: str,
+        entry: float,
+        stop_loss: float,
+        take_profit: float,
+        confluence_score: int,
+        analysis_context: str,
+    ) -> dict:
+        result = self.debate.run(
+            symbol=symbol,
+            direction=direction,
+            entry=entry,
+            sl=stop_loss,
+            tp=take_profit,
+            confluence_score=confluence_score,
+            analysis_context=analysis_context,
+        )
+        return {
+            "verdict":          result.verdict,
+            "should_execute":   result.should_execute,
+            "confidence":       result.confidence,
+            "reason":           result.reason,
+            "adjusted_sl":      result.adjusted_sl,
+            "adjusted_tp":      result.adjusted_tp,
+            "min_confluence":   result.min_confluence,
+            "bull_case":        result.bull_case,
+            "bear_case":        result.bear_case,
+            "risk_assessment":  result.risk_assessment,
+            "summary":          result.summary(),
         }
 
     def _handle_run_session_audit(self, last_n_trades: int = 10) -> dict:
